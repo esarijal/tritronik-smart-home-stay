@@ -10,7 +10,9 @@ import com.tritronik.hiringtest.smart_home_stay.service.RoomService;
 import com.tritronik.hiringtest.smart_home_stay.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -26,12 +28,16 @@ public class ReservationController {
     private final UserService userService;
     private final RoomService roomService;
     private final AdditionalFacilityService additionalFacilityService;
+    private final KafkaTemplate<String, Reservation> kafkaTemplate;
+    @Value("${kafka.topic.reservationCreated}")
+    private String reservationCreatedTopic;
     @Autowired
-    public ReservationController(ReservationService reservationService, UserService userService, RoomService roomService, AdditionalFacilityService additionalFacilityService) {
+    public ReservationController(ReservationService reservationService, UserService userService, RoomService roomService, AdditionalFacilityService additionalFacilityService, KafkaTemplate<String, Reservation> kafkaTemplate) {
         this.reservationService = reservationService;
         this.userService = userService;
         this.roomService = roomService;
         this.additionalFacilityService = additionalFacilityService;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
 
@@ -62,6 +68,8 @@ public class ReservationController {
             LocalDate checkInDate = reservationRequest.getCheckInDate();
             LocalDate checkOutDate = reservationRequest.getCheckOutDate();
             Reservation reservation = reservationService.makeReservation(user, room, selected, checkInDate, checkOutDate);
+
+            kafkaTemplate.send(reservationCreatedTopic, reservation);
 
             return ResponseEntity.ok(reservation);
 

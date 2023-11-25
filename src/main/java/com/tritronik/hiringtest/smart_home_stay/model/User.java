@@ -1,5 +1,6 @@
 package com.tritronik.hiringtest.smart_home_stay.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tritronik.hiringtest.smart_home_stay.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -33,6 +34,7 @@ public class User implements UserDetails {
     private Set<Role> roles;
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles;
     }
