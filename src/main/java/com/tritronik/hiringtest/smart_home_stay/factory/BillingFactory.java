@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class BillingFactory {
@@ -32,20 +31,20 @@ public class BillingFactory {
         return roomPrice + facilitiesPrice;
     }
 
-    private static double calculateRoomPrice(Reservation reservation) {
+    protected static double calculateRoomPrice(Reservation reservation) {
         long days = getDays(reservation);
         return days * reservation.getRoom().getNightlyPrice();
     }
 
-    private static long getDays(Reservation reservation) {
+    protected static long getDays(Reservation reservation) {
         LocalDate checkInDate = reservation.getCheckInDate();
         LocalDate checkOutDate = reservation.getCheckOutDate();
-        long days = ChronoUnit.DAYS.between(checkOutDate, checkInDate);
+        long days = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
         days = days == 0 ? 1 : Math.abs(days);
         return days;
     }
 
-    private static double calculateFacilitiesPrice(Reservation reservation) {
+    protected static double calculateFacilitiesPrice(Reservation reservation) {
         List<SelectedAdditionalFacility> facilities = reservation.getSelectedAdditionalFacilities();
         long days = getDays(reservation);
 
